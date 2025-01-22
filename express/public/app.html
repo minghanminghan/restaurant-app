@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<head>
+    <style>
+        span {
+            width: 50%; /* change this */
+            display: flex;
+            flex-direction: row;
+        }
+        li {
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <span class="navbar wrapper" id="navbar">
+        <!-- style these to look like buttons but make them hold more info (# items selected, total price) -->
+        <button class="navbar content" id="navbar_menu" index="0">Menu</button>
+        <button class="navbar content" id="navbar_select" index="1">Selected</button>
+        <button class="navbar content" id="navbar_order" index="2">Ordered</button>
+    </span>
+    <span class="wrapper" id="main">
+        <span id="menu_view">
+            <p>Menu</p>
+            <ul id="menu">
+            <!-- eventually fetch and assign interactivity -->
+                <li>回锅肉</li>
+                <li>土豆丝</li>
+                <li>鱼香茄子</li>
+                <li>蜜汁叉烧</li>
+                <li>皮蛋瘦肉粥</li>
+                <li>蜂蜜柠檬味鸡翅</li>
+                <li>米饭</li>
+            </ul>
+        </span>
+        <span class="hidden" id="select_view">
+            <p>Selected</p>
+            <ul id="select"></ul>
+            <button id="order_button">Order</button>
+        </span>
+        <span class="hidden" id="order_view">
+            <p>Ordered</p>
+            <ul id="order"></ul>
+        </span>
+    </span>
+    <span class="wrapper" id="bottom">
+        <span>
+            <p>Connections: </p><p id="connects"></p>
+        </span>
+        <a href="https://github.com/minghanminghan" target="_blank">Contact</a>
+    </span>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script type="module">
+"use strict"
+
+/* getting elements */
+const socket = io();
+
+// navbar
+const navbar_contents = new Array(...document.getElementsByClassName('navbar content'));
+const navbar_menu = document.getElementById('navbar_menu');
+const navbar_select = document.getElementById('navbar_select');
+const navbar_order = document.getElementById('navbar_order');
+
+// main
+const main_content = new Array(...document.getElementById('main').children);
+const menu = document.getElementById('menu');
+const select = document.getElementById('select');
+const order = document.getElementById('order');
+const order_button = document.getElementById('order_button');
+
+// bottom
+const connects = document.getElementById('connects');
+
+/* NAVBAR */
+let current = main_content[0];
+console.log(main_content);
+navbar_contents.forEach((ele, i) => {
+    ele.addEventListener("click", () => {
+        const ref = main_content[ele.getAttribute('index')]
+        if (current !== ref) {
+            // toggle visibility of i and current
+            current.classList.toggle('hidden');
+            ref.classList.toggle('hidden');
+            // set current to name+'_view'
+            current = ref;
+            console.log(current);
+        }
+    });
+});
+
+
+/* MAIN */
+
+// event handling
+for (let i of menu.children) { // document.onload this?
+    i.addEventListener("click", () => {
+        socket.emit('select', i.innerText);
+    });
+}
+
+socket.on('select', (item) => {
+    addSelect(item);
+});
+
+socket.on('deselect', (index) => {
+    // remove index from order list
+    const rem = select.children[index];
+    select.removeChild(rem);
+});
+
+socket.on('welcome', (select, order) => {
+    console.log(select, order);
+    for(const s of select) {
+        addSelect(s);
+    }
+    for(const o of order) {
+        addOrder(o);
+    }
+});
+
+socket.on('order', () => {
+    // move all of select into order
+    order.innerHTML += select.innerHTML;
+    select.innerHTML = '';
+})
+
+socket.on('conn', (num) => {
+    setConnects(num);
+});
+
+socket.on('disconn', (num) => {
+    setConnects(num);
+});
+
+function setConnects(num) {
+    connects.innerText = num;
+}
+
+function addSelect(item) {
+    const li = document.createElement("li");
+    li.innerText = item;
+    const index = select.children.length;
+    li.addEventListener("click", () => {
+        socket.emit("deselect", index);
+    });
+    select.appendChild(li);
+}
+
+function addOrder(item) {
+    const li = document.createElement("li");
+    li.innerText = item;
+    order.appendChild(li);
+}
+
+order_button.addEventListener("click", () => {
+    socket.emit("order");
+});
+</script>

@@ -1,0 +1,82 @@
+/* TODO: implement dark mode with context */
+/* dark/light mode themes */
+.dark{
+    background-color: #082032;
+    color: #EEEEEE;
+    .meta {
+        background-color: #F4F9F9;
+        color: #555555;
+    }
+}
+.light{
+    background-color: #F4F9F9;
+    color: #555555;
+    .meta {
+        background-color: #082032;
+        color: #EEEEEE;
+        a {
+            color: #EEEEEE;
+        }
+    }
+}
+
+
+/* general (MenuItem, Footer, maybe Header) */
+.row.wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.row.wrapper > * {
+    margin-right: 20px;
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+}
+
+/* App.js */
+#App {
+    display:block;
+    height: 100vh;
+}
+
+/* Header.js */
+#Header {
+    align-items: center;
+    justify-content: center;
+}
+
+/* Main.js */
+#Main {
+    padding: 15px;
+}
+
+/* MenuItem.js */
+#MenuItem {
+    align-items: center;
+    button {
+        cursor: pointer;
+    }
+}
+
+/* NavBar.js */
+#NavBar {
+    margin-top: auto;
+    padding: 15px;
+    button {
+        cursor: pointer;
+    }
+}
+
+/* Footer.js */
+#Footer {
+    position: absolute;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    bottom: 0;
+    left: 0;
+}
