@@ -1,8 +1,15 @@
 import { io } from 'socket.io-client';
-export const socket = io(process.env.REACT_APP_BACKEND);
+export const socket = io(process.env.REACT_APP_BACKEND_URL);
 
-// create an object to hold states of socket, import elsewhere
+export const select = (id) => {
+    socket.emit("select", id);
+}
 
+export const deselect = (id) => {
+    socket.emit("deselect", id);
+}
 
-// update socket state here
-socket.on();
+// TODO: integrate payment
+export const order = () => {
+    socket.emit("order");
+}

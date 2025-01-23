@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useTheme } from './utils/ThemeContext.js';
+import SocketProvider from './utils/SocketContext.js';
 
 import "./styles/App.css";
 
@@ -14,6 +14,7 @@ export default function App ({}) {
     const {val, setVal} = useTheme();
 
     return(
+        <SocketProvider>
         <div id="App" className={`${val}`}>
         {/* may need to distribute val */}
             <Header/>
@@ -21,5 +22,6 @@ export default function App ({}) {
             <NavBar />
             <Footer />
         </div>
+        </SocketProvider>
     );    
 }

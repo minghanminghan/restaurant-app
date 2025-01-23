@@ -1,23 +1,12 @@
 import { useState, useContext } from "react";
-import { socket } from "../utils/socket.js";
+import { SocketContext } from "../utils/SocketContext.js";
 import { useTheme } from "../utils/ThemeContext.js";
 
 // store connections, contact
 export default function Footer ({  }) {
 
     const {val, setVal} = useTheme();
-    const [conn, setConn] = useState(0);
-    const [id, setId] = useState('');
-    const [select, setSelect] = useState([]);
-
-    socket.on('connect', () => {
-        setId(socket.id);
-    });
-
-    socket.on('conn', (num) => {
-        setConn(num);
-    });
-
+    const sock = useContext(SocketContext);
 
     return (
         <div className="Footer row wrapper meta" id="Footer">
@@ -31,8 +20,7 @@ export default function Footer ({  }) {
                     <option value="dark">Dark</option>
                 </select>
             </form>
-            <p>Connections: {conn}</p>
-            <p>Client ID: {id}</p>
+            <p>Connections: {sock.conn}</p>
             <b><a href="https://github.com/minghanminghan">Contact</a></b>
         </div>
     );

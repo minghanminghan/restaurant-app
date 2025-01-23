@@ -12,14 +12,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
+app.use('/static', express.static(path.join(__dirname, 'public')));
 const httpServer = createServer(app);
 const io = new Server(httpServer, {cors: {
-    origin: "http://localhost:3000"
+    origin: process.env.REACT
 }});
 
 // request logger
 app.use((req, res, next) => {
-    console.log(req.path, req.params, req.body);
+    console.log(req.method, req.path, req.params, req.body);
     next();
 });
 
@@ -27,21 +28,18 @@ app.use((req, res, next) => {
 const menu = {
     0: {
         id: 0, // might be redundant
-        src: "img0.png",
         name: "one",
         desc: "id=0, name='one', cost=1",
         cost: 1
     },
     1: {
         id: 1,
-        src: "img1.png",
         name: "one thousand",
         desc: "id=1, name='one thousand', cost=1000",
         cost: 1000
     },
     2: {
         id: 2,
-        src: "img2.png",
         name: "one million",
         desc: "id=2, name='one million', cost=1000000",
         cost: 1000000
@@ -49,7 +47,7 @@ const menu = {
 };
 
 // caches
-const select = {0: 0, 1: 0, 2: 0, count: 0, cost: 0}; // TODO: fix this
+const select = {0: 0, 1: 0, 2: 0, count: 0, cost: 0};
 const order = {0: 0, 1: 0, 2: 0, count: 0, cost: 0}; // monotonic non-decreasing
 let conn_count = 0;
 
@@ -57,8 +55,7 @@ let conn_count = 0;
 io.on("connection", (socket) => {
     conn_count++;
     console.log("connections:", conn_count);
-    io.to(socket.id).emit('welcome', {menu: menu});
-    io.to(socket.id).emit('cache', {select: select, order: order});    
+    io.to(socket.id).emit('welcome', {conn: conn_count, menu: menu, select: select, order: order});
     io.emit("conn", conn_count);
 
 
@@ -83,32 +80,39 @@ io.on("connection", (socket) => {
 
 
     socket.on("deselect", (id) => { // 
-        if (select[id] !== undefined) {
+        if (select[id] !== undefined && select[id] > 0) {
             // remove index from list
-            io.emit("deselect", id);
             select[id]--;
-            console.log("select:", select);
+            select['count']--;
+            select['cost'] -= menu[id].cost;
+            io.emit("select", select);
+            console.log("select", select);
         }
     });
 
-    // TODO: fix this logic
     socket.on("order", () => {
-        io.emit("order");
-        // move all of select into order
-        order.push(...select);
-        select.splice(0);
-        console.log(order);
-    });
-
-
-    socket.on("pay", (transaction) => {
-        // 
+        if (select.count > 0) {
+            // move all of select into order
+            Object.keys(select).forEach(k => {
+                order[k] += select[k];
+                select[k] = 0;
+            });
+            io.emit("order", order, select);
+            console.log("order", order);
+        }
     });
 });
 
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/app.html'));
+});
+
+app.get('/select', (req, res) => {
+    res.send(select);
+});
+
+app.get('/order', (req, res) => {
+    res.send(order);
 });
 
 
@@ -116,3 +120,9 @@ const PORT = process.env.EXPRESS_PORT ?? 3001;
 httpServer.listen(PORT, () => {
     console.log('listening on port', PORT);
 });
+
+export {
+    app,
+    httpServer,
+    io
+};
