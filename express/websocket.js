@@ -1,7 +1,9 @@
 import { config } from "dotenv";
 config();
 import { Server } from "socket.io";
-import { httpServer } from "server.js";
+import { MenuItem, Order, Restaurant } from "./db/db.js";
+
+// isolating socket.io dependency to websocket.js file
 
 /*
 // temp model of db: id: { name, description, cost }
@@ -29,70 +31,72 @@ const menu = {
 // caches
 const select = {0: 0, 1: 0, 2: 0, count: 0, cost: 0};
 const order = {0: 0, 1: 0, 2: 0, count: 0, cost: 0}; // monotonic non-decreasing
-let conn_count = 0;
 */
 
 // refactor cache here
 // define select, order using Order model
 // rmb changed method: Order.getCount() instead of Order.count
 
-
-const io = new Server(httpServer, {cors: {
-    origin: process.env.REACT
-}});
-
-// websocket config
-io.on("connection", (socket) => {
-    conn_count++;
-    console.log("connections:", conn_count);
-    io.to(socket.id).emit('welcome', {conn: conn_count, menu: menu, select: select, order: order});
-    io.emit("conn", conn_count);
-
-
-    socket.on("disconnect", () => {
-        conn_count--;
-        console.log("connections:", conn_count);
-        io.emit("conn", conn_count);
+export const getIo = (server) => {
+    let CONNECTIONS = 0;
+    const io = new Server(server, {
+        cors: { origin: process.env.REACT_URL ?? 3000 }
     });
 
+    io.on("connection", (socket) => {
+        // TODO: implement validation
 
-    // user actions: add item, remove item, order, pay
-    socket.on("select", (id) => { // reference menu[id]
-        if (select[id] !== undefined) {
-            // increment cache item
-            select[id]++;
-            select['count']++;
-            select['cost'] += menu[id].cost;
-            io.emit("select", select);
-            console.log("select:", select);
-        }
+        CONNECTIONS++;
+        console.log("connections:", CONNECTIONS);
+        
+        // configure menu, select, order
+            // menu: grab from database and drop irrelevant fields (_id, etc.)
+            // select, order: create cache
+        io.to(socket.id).emit('welcome', {conn: CONNECTIONS, menu: menu, select: select, order: order});
+        io.emit("conn", CONNECTIONS);
+    
+    
+        socket.on("disconnect", () => {
+            CONNECTIONS--;
+            console.log("connections:", CONNECTIONS);
+            io.emit("conn", CONNECTIONS);
+        });
+    
+    
+        // user actions: add item, remove item, order, pay
+        socket.on("select", (id) => { // reference menu[id]
+            if (select[id] !== undefined) {
+                // increment cache item
+                select[id]++;
+                select['count']++;
+                select['cost'] += menu[id].cost;
+                io.emit("select", select);
+                console.log("select:", select);
+            }
+        });
+    
+    
+        socket.on("deselect", (id) => { // 
+            if (select[id] !== undefined && select[id] > 0) {
+                // remove index from list
+                select[id]--;
+                select['count']--;
+                select['cost'] -= menu[id].cost;
+                io.emit("select", select);
+                console.log("select", select);
+            }
+        });
+    
+        socket.on("order", () => {
+            if (select.count > 0) {
+                // move all of select into order
+                Object.keys(select).forEach(k => {
+                    order[k] += select[k];
+                    select[k] = 0;
+                });
+                io.emit("order", order, select);
+                console.log("order", order);
+            }
+        });
     });
-
-
-    socket.on("deselect", (id) => { // 
-        if (select[id] !== undefined && select[id] > 0) {
-            // remove index from list
-            select[id]--;
-            select['count']--;
-            select['cost'] -= menu[id].cost;
-            io.emit("select", select);
-            console.log("select", select);
-        }
-    });
-
-    socket.on("order", () => {
-        if (select.count > 0) {
-            // move all of select into order
-            Object.keys(select).forEach(k => {
-                order[k] += select[k];
-                select[k] = 0;
-            });
-            io.emit("order", order, select);
-            console.log("order", order);
-        }
-    });
-});
-
-export {
-    io
 };

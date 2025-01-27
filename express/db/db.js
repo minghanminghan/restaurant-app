@@ -2,17 +2,17 @@ import { config } from "dotenv";
 config();
 import mongoose from "mongoose";
 
-const db = process.env.db
-await mongoose.connect(process.env.DB).then(() => console.log('connected to mongoose:', db));
 
 const Schema = mongoose.Schema;
 
 
 const MenuItemSchema = new Schema({
-    name: { type: String, required: true, index: { unique: true }},
+    restaurant: { type: String, required: true},
+    name: { type: String, required: true },
     desc: { type: String, required: true },
     cost: { type: Number, required: true },
 });
+MenuItemSchema.index({ restaurant: 1, name: 1 }, { unique: true }) // composite key: (restaurant, name)
 const MenuItem = mongoose.model('MenuItem', MenuItemSchema);
 
 
@@ -26,8 +26,10 @@ OrderSchema.methods.getCount = function() {
 const Order = mongoose.model('Order', OrderSchema);
 
 const RestaurantSchema = new Schema({
-    menu: { type: Array, required: true }, // Array<MenuItem>
-    orders: { type: Array, required: true }, // Array<Order>
+    name: { type: String, required: true },
+    capacity: { type: Number, required: true }, // zero-indexed
+    menu: { type: Array, required: true }, // Array<MenuItem>, embedded
+    orders: { type: Array, required: true }, // Array<Order>, embedded
 });
 const Restaurant = mongoose.model('Restaurant', RestaurantSchema);
 
