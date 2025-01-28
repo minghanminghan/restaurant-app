@@ -36,24 +36,6 @@ app.get('/', (req, res) => {
     res.send('API is running!');
 });
 
-/*
-// make this a socket route
-app.get('/:restaurant/:order', async (req, res) => {
-    // validate restaurant
-    const restaurant = await Restaurant.findOne({ name: req.params.restaurant }).lean();
-    if (restaurant === null) {
-        res.status(404).send('invalid restaurant name');
-    }
-
-    // validate order
-    const order = parseInt(req.params.order);
-    if (order < 0 || order >= restaurant.capacity) {
-        res.status(404).send('invalid order number');
-    }
-
-    res.sendStatus(200);
-});
-*/
 
 const PORT = process.env.EXPRESS_PORT ?? 3001;
 httpServer.listen(PORT, () => {

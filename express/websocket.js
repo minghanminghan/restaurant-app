@@ -40,8 +40,25 @@ const order = {0: 0, 1: 0, 2: 0, count: 0, cost: 0}; // monotonic non-decreasing
 export const getIo = (server) => {
     let CONNECTIONS = 0;
     const io = new Server(server, {
-        cors: { origin: process.env.REACT_URL ?? 3000 }
+        cors: { origin: process.env.REACT_URL ?? 3000 },
     });
+
+    // verify connection
+    io.use(async function(socket, next) {
+        const restaurant = await Restaurant.findOne({ name: socket.query.restaurant }).lean();
+        if (restaurant === null) {
+            next(new Error('Invalid restaurant'));
+        }
+
+        // validate order
+        const order = parseInt(req.params.order);
+        if (order < 0 || order >= restaurant.capacity) {
+            next(new Error('Invalid order number'));
+        }
+
+        res.sendStatus(200);
+    })
+
 
     io.on("connection", (socket) => {
         // TODO: implement validation
@@ -87,6 +104,7 @@ export const getIo = (server) => {
             }
         });
     
+
         socket.on("order", () => {
             if (select.count > 0) {
                 // move all of select into order

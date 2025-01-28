@@ -12,7 +12,12 @@ export const VALID_CONNECTION = await fetch(INIT_URL)
 console.log(VALID_CONNECTION);
 */
 
-export const socket = io(process.env.REACT_APP_BACKEND_URL);
+export const socket = io(process.env.REACT_APP_BACKEND_URL, {
+    query: { 
+        "restaurant": process.env.REACT_APP_RESTAURANT_NAME,
+        "order": process.env.REACT_APP_ORDER_NUMBER
+     },
+});
 
 export const select = (id) => {
     socket.emit("select", id);

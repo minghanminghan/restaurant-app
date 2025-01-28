@@ -25,6 +25,7 @@ OrderSchema.methods.getCount = function() {
 };
 const Order = mongoose.model('Order', OrderSchema);
 
+
 const RestaurantSchema = new Schema({
     name: { type: String, required: true },
     capacity: { type: Number, required: true }, // zero-indexed
