@@ -6,21 +6,21 @@ export const SocketContext = createContext();
 const SocketProvider = ({children}) =>{
 
     const [conn, setConn] = useState(0);
-    const [menu, setMenu] = useState({});
-    const [select, setSelect] = useState({});
-    const [order, setOrder] = useState({});
+    const [menu, setMenu] = useState([]);
+    const [order, setOrder] = useState({
+        connections: 0,
+        items: [],
+        cost: 0
+    });
     const sock = {
         conn: conn,
         menu: menu,
-        select: select,
         order: order
     }
 
-    // socket interface
     socket.on("welcome", cache => {
-        setConn(cache.conn);
+        console.log(cache);
         setMenu(cache.menu);
-        setSelect(cache.select);
         setOrder(cache.order);
     });
 
@@ -29,13 +29,9 @@ const SocketProvider = ({children}) =>{
     });
 
     socket.on("select", select => {
-        setSelect(select); 
+        console.log(select);
+        setOrder(select); 
     });
-
-    socket.on("order", (order, select) => {
-        setOrder(order);
-        setSelect(select);
-    })
 
 
     return (

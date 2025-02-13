@@ -21,16 +21,19 @@ app.use(cors({
     credentials: true,            //access-control-allow-credentials:true    
     optionSuccessStatus: 200
 }));
-app.use('/static', express.static(path.join(__dirname, '/public')));
+//app.use('/static', express.static(path.join(__dirname, '/public')));
+
 const httpServer = createServer(app);
 getIo(httpServer);
 
 
 // request logger
+/*
 app.use((req, res, next) => {
     console.log(req.method, req.path, req.params, req.body);
     next();
 });
+*/
 
 app.get('/', (req, res) => {
     res.send('API is running!');

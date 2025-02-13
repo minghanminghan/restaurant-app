@@ -20,14 +20,14 @@ export const socket = io(process.env.REACT_APP_BACKEND_URL, {
 });
 
 export const select = (id) => {
-    socket.emit("select", id);
-}
+    socket.emit("select", String(id));
+};
 
 export const deselect = (id) => {
-    socket.emit("deselect", id);
-}
+    socket.emit("deselect", String(id));
+};
 
 // TODO: integrate payment
 export const order = () => {
     socket.emit("order");
-}
+};

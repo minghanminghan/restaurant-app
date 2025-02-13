@@ -6,10 +6,11 @@ import MenuItem from "./MenuItem.js";
 export default function Main ({  }) {
 
     const sock = useContext(SocketContext);
-    const displayMenu = Object.values(sock.menu).map((v, i) => { // on load
-        return <MenuItem item={v} key={i}
-            increment={() => select(v.id)}
-            decrement={() => deselect(v.id)}
+
+    const displayMenu = Object.values(Object.entries(sock.menu)).map(([i, v]) => { // on load
+        return <MenuItem item={v} key={i} id={i}
+            select={() => select(i)}
+            deselect={() => deselect(i)}
         />
     });
 

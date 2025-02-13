@@ -12,17 +12,35 @@ async function db_init() {
     Order.deleteMany({}).then(() => console.log('cleared Order'));
     Restaurant.deleteMany({}).then(() => console.log('cleared Restaurant'));
 
-    const menu = [
-        new MenuItem({ restaurant: "test", name: "one", cost: 1, desc: "name='one', cost=1" }),
-        new MenuItem({ restaurant: "test",  name: "one thousand", cost: 1000, desc: "name='one thousand', cost=1000" }),
-        new MenuItem({ restaurant: "test",  name: "one million", cost: 1000000, desc: "name='one million', cost=1000000" })
-    ];
-    await MenuItem.bulkSave(menu).then(() => console.log('created MenuItems'));
+    let menu = {};
+    for (let [idx, name, cost] of [[0, 'one', 1], [1, 'one thousand', 1000], [2, 'one million', 1000000]]){
+      const item = new MenuItem({
+        restaurant: "test",
+        name: name,
+        cost: cost,
+        desc: "name='"+name+"', cost='"+cost+"'"
+      });
+      await item.save();
+      menu[idx] = item;
+    }
 
-    const restaurant = new Restaurant({ name: "test", capacity: 0, menu: menu, orders: [] });
+    const order = new Order({ 
+      restaurant: "test",
+      items: { 0: 0, 1: 0, 2: 0 }
+    });
+    const orders = {
+      0: order._id // based on the restaurant capacity (below)
+    };
+    const restaurant = new Restaurant({ 
+      name: "test",
+      capacity: 1,
+      menu: menu,
+      orders: orders
+    });
+    
+    await order.save();
     await restaurant.save().then(() => console.log('created Restaurant: test'));
     console.log(restaurant);
-
     await mongoose.disconnect().then(() => console.log('disconnected from mongoose'));
 }
 

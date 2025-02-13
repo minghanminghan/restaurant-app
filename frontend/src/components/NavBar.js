@@ -11,9 +11,8 @@ export default function NavBar({  }) {
     return (
         <div id="NavBar" className={`NavBar row wrapper`}>
             <ViewOrder show={show} setShow={setShow} />
-            <p>Total: ${sock.select.cost}</p>
-            <button onClick={order}>Checkout ({sock.select.count})</button>
-            <button onClick={() => setShow(!show)}>View Ordered ({sock.order.count})</button>
+            <p>Total: ${sock.order.cost}</p>
+            <button onClick={order}>Checkout ({Object.values(sock.order.items).reduce((acc, cur) => acc+cur, 0)})</button>
         </div>
     );
 }

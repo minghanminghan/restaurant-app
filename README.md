@@ -1,19 +1,20 @@
 TODO:
     Backend:
-        integrate db (IN PROGRESS)
-        integrate payment
+        x integrate db (standardize functions from db/init_config.js)
+        o integrate payment (stripe)
+        - scale up (handle restaurant, menu configuration)
 
     Frontend:
-        ui overhaul
+        - ui overhaul
             - colors
             - positions
-        increase interactivity to menu items
+        - increase interactivity to menu items
             - overlay
             - more state
 
     Ops:
-        add tests (IN PROGRESS)
-        dockerize
+        o add tests
+        x dockerize
 
 .env config for dev environment (push this?):
     express/.env:
