@@ -1,8 +1,15 @@
-TODO:
+### Overview
+Event-driven food ordering app
+
+### Usage
+1. `git clone https://github.com/minghanminghan/restaurant-app`
+2. `cd backend && node server.js`
+3. `cd ../frontend && npm start`
+
+### Todo
     Backend:
-        x integrate db (standardize functions from db/init_config.js)
         o integrate payment (stripe)
-        - scale up (handle restaurant, menu configuration)
+        - scale (handle restaurant, menu configuration)
 
     Frontend:
         - ui overhaul
@@ -14,4 +21,3 @@ TODO:
 
     Ops:
         o add tests
-        x dockerize
